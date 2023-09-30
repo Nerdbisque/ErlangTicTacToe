@@ -1,4 +1,4 @@
--module(tic)..
+-module(tic).
 -export([start/0, display_board/1, make_move/3, game_over/1]).
 
 % Custom exception for invalid moves
@@ -47,9 +47,10 @@ game_over_check(Board) ->
         ["X", "X", "X"] -> {winner, "X"};
         _ -> case lists:filter(fun(O) -> O =:= "O" end, Board) of
             ["O", "O", "O"] -> {winner, "O"};
-            _ -> if lists:any(fun(E) -> E == " " end, Board) -> {continue, "Continue"};
-                    true -> {draw, "Draw"}
-                 end
+            _ -> case lists:any(fun(E) -> E == " " end, Board) of
+                true -> {continue, "Continue"};
+                false -> {draw, "Draw"}
+            end
         end
     end.
 
