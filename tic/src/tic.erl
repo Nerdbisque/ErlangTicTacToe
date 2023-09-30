@@ -1,4 +1,4 @@
--module(tictactoe).
+-module(tic).
 -compile(export_all).
 
 % Tic Tac Toe game state
