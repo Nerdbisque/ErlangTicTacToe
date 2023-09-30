@@ -53,7 +53,7 @@ game_over_check(Board) ->
             end
         end
     end.
-
+    
 % Play the game recursively
 play_game(Board, Player) ->
     display_board(Board),
