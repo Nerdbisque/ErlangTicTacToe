@@ -1,4 +1,4 @@
--module(tic).
+-module(tic)..
 -export([start/0, display_board/1, make_move/3, game_over/1]).
 
 % Custom exception for invalid moves
