@@ -11,11 +11,11 @@ start() ->
 
 % Display the Tic Tac Toe board
 display_board(Board) ->
-    io:format("~n ~s | ~s | ~s ~n", [Board ! [1,2,3]]),
+    io:format("~n ~s | ~s | ~s ~n", [lists:nth(1, Board), lists:nth(2, Board), lists:nth(3, Board)]),
     io:format("-----------~n"),
-    io:format(" ~s | ~s | ~s ~n", [Board ! [4,5,6]]),
+    io:format(" ~s | ~s | ~s ~n", [lists:nth(4, Board), lists:nth(5, Board), lists:nth(6, Board)]),
     io:format("-----------~n"),
-    io:format(" ~s | ~s | ~s ~n~n", [Board ! [7,8,9]]).
+    io:format(" ~s | ~s | ~s ~n~n", [lists:nth(7, Board), lists:nth(8, Board), lists:nth(9, Board)]).
 
 % Make a move on the board
 make_move(Board, Position, Player) ->
