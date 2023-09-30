@@ -1,4 +1,4 @@
--module(tic).
+-module(tic_tac_toe).
 -export([start/0, display_board/1, make_move/3, game_over/1]).
 
 % Custom exception for invalid moves
@@ -19,13 +19,16 @@ display_board(Board) ->
 
 % Make a move on the board
 make_move(Board, Position, Player) ->
-    case {Position >= 1 andalso Position =< 9, lists:nth(Position, Board) =:= integer_to_list(Position)} of
-        {true, true} ->
-            NewBoard = lists:sublist(Board, Position - 1) ++ [Player] ++ lists:nthtail(Position, Board),
-            {ok, NewBoard};
-        {false, _} ->
-            ?INVALID_MOVE;
-        {_, false} ->
+    case Position >= 1 andalso Position =< 9 of
+        true ->
+            case lists:nth(Position, Board) =:= integer_to_list(Position) of
+                true ->
+                    NewBoard = lists:sublist(Board, Position - 1) ++ [Player] ++ lists:nthtail(Position, Board),
+                    {ok, NewBoard};
+                false ->
+                    ?INVALID_MOVE
+            end;
+        false ->
             ?INVALID_MOVE
     end.
 
