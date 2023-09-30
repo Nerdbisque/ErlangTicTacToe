@@ -1,5 +1,5 @@
 -module(tic).
--export([start/0, display_board/1, make_move/3, game_over/1]).
+-export([start/0, display_board/1, make_move/3, game_over/1, reset_game/0]).
 
 % Custom exception for invalid moves
 -define(INVALID_MOVE, {error, "Invalid move. Try again."}).
@@ -80,3 +80,8 @@ play_game(Board, Player) ->
 read_move() ->
     {ok, [Move]} = io:fread("~d", ""),
     Move.
+
+% Reset the game
+reset_game() ->
+    io:format("The game has been reset.~n"),
+    start().
