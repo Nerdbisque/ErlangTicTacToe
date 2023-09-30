@@ -1,4 +1,4 @@
--module(tic_tac_toe).
+-module(tic).
 -export([start/0, display_board/1, make_move/3, game_over/1]).
 
 % Custom exception for invalid moves
@@ -34,12 +34,21 @@ make_move(Board, Position, Player) ->
 
 % Check if the game is over
 game_over(Board) ->
+    case game_over_check(Board) of
+        {winner, "X"} -> "X";
+        {winner, "O"} -> "O";
+        {continue, _} -> "Continue";
+        {draw, _} -> "Draw"
+    end.
+
+% Helper function for checking game over
+game_over_check(Board) ->
     case lists:filter(fun(X) -> X =:= "X" end, Board) of
-        ["X", "X", "X"] -> "X";
+        ["X", "X", "X"] -> {winner, "X"};
         _ -> case lists:filter(fun(O) -> O =:= "O" end, Board) of
-            ["O", "O", "O"] -> "O";
-            _ -> if lists:member(" ", Board) -> "Continue";
-                    true -> "Draw"
+            ["O", "O", "O"] -> {winner, "O"};
+            _ -> if lists:any(fun(E) -> E == " " end, Board) -> {continue, "Continue"};
+                    true -> {draw, "Draw"}
                  end
         end
     end.
