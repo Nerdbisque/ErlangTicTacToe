@@ -117,6 +117,7 @@ game_state_to_list(GameState) ->
     [GameState#a1, GameState#a2, GameState#a3, GameState#b1, GameState#b2, GameState#b3,
      GameState#c1, GameState#c2, GameState#c3].
 
+
 % Value if match
 value_if_match(X, X, NewValue) -> NewValue;
 value_if_match(X, _, _) -> X.
