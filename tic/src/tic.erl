@@ -69,7 +69,7 @@ play_game(Board, Player) ->
             Move = read_move(),
             case make_move(Board, Move, Player) of
                 {ok, NewBoard} ->
-                    play_game(NewBoard, if Player == "X" -> "O"; true -> "X" end);
+                    play_game(NewBoard, if Player == "X" -> "O"; Player == "O" -> "X"; true -> Player end);
                 ?INVALID_MOVE ->
                     io:format("Invalid move. Try again.~n"),
                     play_game(Board, Player)
