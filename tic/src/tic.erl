@@ -21,12 +21,14 @@ display_board(Board) ->
 make_move(Board, Position, Player) ->
     case Position >= 1 andalso Position =< 9 of
         true ->
-            case lists:nth(Position, Board) =:= integer_to_list(Position) of
-                true ->
+            case lists:nth(Position, Board) of
+                "X" ->
+                    ?INVALID_MOVE;
+                "O" ->
+                    ?INVALID_MOVE;
+                _ ->
                     NewBoard = lists:sublist(Board, Position - 1) ++ [Player] ++ lists:nthtail(Position, Board),
-                    {ok, NewBoard};
-                false ->
-                    ?INVALID_MOVE
+                    {ok, NewBoard}
             end;
         false ->
             ?INVALID_MOVE
