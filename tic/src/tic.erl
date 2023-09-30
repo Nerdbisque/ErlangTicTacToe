@@ -47,13 +47,13 @@ game_over_check(Board) ->
         ["X", "X", "X"] -> {winner, "X"};
         _ -> case lists:filter(fun(O) -> O =:= "O" end, Board) of
             ["O", "O", "O"] -> {winner, "O"};
-            _ -> case lists:any(fun(E) -> E == " " end, Board) of
+            _ -> case lists:member(" ", Board) of
                 true -> {continue, "Continue"};
                 false -> {draw, "Draw"}
             end
         end
     end.
-    
+
 % Play the game recursively
 play_game(Board, Player) ->
     display_board(Board),
@@ -79,7 +79,7 @@ play_game(Board, Player) ->
 % Read player's move from the console
 read_move() ->
     {ok, [Move]} = io:fread("~d", ""),
-    Move.
+    list_to_integer(Move).
 
 % Reset the game
 reset_game() ->
