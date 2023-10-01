@@ -1,135 +1,87 @@
 -module(tic).
--compile(export_all).
+-export([start/0, display_board/1, make_move/3, game_over/1, reset_game/0]).
 
-% Tic Tac Toe game state
--record(game_state, {a1, a2, a3, b1, b2, b3, c1, c2, c3}).
+% Custom exception for invalid moves
+-define(INVALID_MOVE, {error, "Invalid move. Try again."}).
 
-% Player record
--record(player, {pid, name}).
+% Start the game
+start() ->
+    io:format("Welcome to Tic Tac Toe!~n"),
+    play_game(["1", "2", "3", "4", "5", "6", "7", "8", "9"], "X").
 
-% Possible game results
--define(tie, tie).
--define(x, x).
--define(o, o).
--define(undecided, undecided).
--define(continue, continue).
+% Display the Tic Tac Toe board
+display_board(Board) ->
+    io:format("~n ~s | ~s | ~s ~n", [lists:nth(1, Board), lists:nth(2, Board), lists:nth(3, Board)]),
+    io:format("-----------~n"),
+    io:format(" ~s | ~s | ~s ~n", [lists:nth(4, Board), lists:nth(5, Board), lists:nth(6, Board)]),
+    io:format("-----------~n"),
+    io:format(" ~s | ~s | ~s ~n~n", [lists:nth(7, Board), lists:nth(8, Board), lists:nth(9, Board)]).
 
-% Start the Tic Tac Toe game
-start(PlayerOne, PlayerTwo) ->
-    InitialGame = #game_state{a1=a1, a2=a2, a3=a3, b1=b1, b2=b2, b3=b3, c1=c1, c2=c2, c3=c3},
-    spawn(tictactoe, loop, [PlayerOne, PlayerTwo, PlayerOne, InitialGame]).
-
-% Make a move in the Tic Tac Toe game
-make_move(GamePid, Player, Move) ->
-    GamePid ! {make_move, Player, Move}.
-
-% Game loop
-loop(PlayerOne, PlayerTwo, CurrentPlayer, GameState) ->
-    {CurrentPid, CurrentName} = CurrentPlayer,
-    {PlayerOnePid, PlayerOneName} = PlayerOne,
-    {PlayerTwoPid, PlayerTwoName} = PlayerTwo,
-    receive
-        {make_move, CurrentName, Move} ->
-            ValidMove = is_valid_move(Move, GameState),
-            case ValidMove of
+% Make a move on the board
+make_move(Board, Position, Player) ->
+    case Position >= 1 andalso Position =< 9 of
+        true ->
+            case lists:nth(Position, Board) =:= integer_to_list(Position) of
                 true ->
-                    CurrentPlayerAtom = player_atom(PlayerOne, PlayerTwo, CurrentPlayer),
-                    UpdateFun = fun(Pos) ->
-                        value_if_match(Pos, Move, CurrentPlayerAtom)
-                    end,
-                    NewGameState = update_game_state(GameState, UpdateFun),
-                    NewCurrentPlayer = change_player(PlayerOne, PlayerTwo, CurrentPlayer),
-                    io:format("State: ~p -> ~p~n", [GameState, NewGameState]),
-                    case get_game_result(NewGameState) of
-                        ?tie ->
-                            gameclient:game_tie(PlayerOnePid, PlayerTwoName, NewGameState),
-                            gameclient:game_tie(PlayerTwoPid, PlayerOneName, NewGameState);
-                        ?x ->
-                            gameclient:send_message(PlayerOnePid, get_win_message(PlayerTwoName)),
-                            gameclient:send_message(PlayerTwoPid, get_loose_message(PlayerOneName));
-                        ?o ->
-                            gameclient:send_message(PlayerTwoPid, get_win_message(PlayerOneName)),
-                            gameclient:send_message(PlayerOnePid, get_loose_message(PlayerTwoName));
-                        ?continue ->
-                            loop(PlayerOne, PlayerTwo, NewCurrentPlayer, NewGameState)
-                    end;
+                    NewBoard = lists:sublist(Board, Position - 1) ++ [Player] ++ lists:nthtail(Position, Board),
+                    {ok, NewBoard};
                 false ->
-                    gameclient:send_message(CurrentPid, "Position " ++ erlang:atom_to_list(Move) ++ " is not available."),
-                    loop(PlayerOne, PlayerTwo, CurrentPlayer, GameState)
+                    ?INVALID_MOVE
             end;
-
-        {make_move, WrongPlayerName, _} ->
-            WrongPlayerPid = get_pid_for_player_name(PlayerOne, PlayerTwo, WrongPlayerName),
-            gameclient:send_message(WrongPlayerPid, "It is not your turn yet!"),
-            loop(PlayerOne, PlayerTwo, CurrentPlayer, GameState);
-
-        Message ->
-            io:format("PlayerOne: ~p~n PlayerTwo: ~p~n CurrentPlayer: ~p~n Message: ~p~n", [PlayerOne, PlayerTwo, CurrentPlayer, Message]),
-            loop(PlayerOne, PlayerTwo, CurrentPlayer, GameState)
+        false ->
+            ?INVALID_MOVE
     end.
 
-% Get the win message
-get_win_message(Over) ->
-    "You won over " ++ Over ++ " :)".
-
-% Get the loose message
-get_loose_message(For) ->
-    "You lost over " ++ For ++ "... :(".
-
-% Get the game result
-get_game_result(GameState) ->
-    case check_for_winner(GameState) of
-        ?undecided ->
-            GameOver = lists:all(fun(X) -> (X =:= ?x) or (X =:= ?o) end, game_state_to_list(GameState)),
-            if
-                GameOver ->
-                    ?tie;
-                true ->
-                    ?continue
-            end;
-        X -> X
+% Check if the game is over
+game_over(Board) ->
+    case game_over_check(Board) of
+        {winner, "X"} -> "X";
+        {winner, "O"} -> "O";
+        {continue, _} -> "Continue";
+        {draw, _} -> "Draw"
     end.
 
-% Check for a winner in the Tic Tac Toe game
-check_for_winner(GameState) ->
-    Rows = [[a1, a2, a3], [b1, b2, b3], [c1, c2, c3]],
-    Columns = [[a1, b1, c1], [a2, b2, c2], [a3, b3, c3]],
-    Diagonals = [[a1, b2, c3], [a3, b2, c1]],
-    get_winner(Rows ++ Columns ++ Diagonals).
+% Helper function for checking game over
+game_over_check(Board) ->
+    case lists:filter(fun(X) -> X =:= "X" end, Board) of
+        ["X", "X", "X"] -> {winner, "X"};
+        _ -> case lists:filter(fun(O) -> O =:= "O" end, Board) of
+            ["O", "O", "O"] -> {winner, "O"};
+            _ -> case lists:any(fun(E) -> E == " " end, Board) of
+                true -> {continue, "Continue"};
+                false -> {draw, "Draw"}
+            end
+        end
+    end.
+    
+% Play the game recursively
+play_game(Board, Player) ->
+    display_board(Board),
+    case game_over(Board) of
+        "X" ->
+            io:format("Player X wins!~n");
+        "O" ->
+            io:format("Player O wins!~n");
+        "Draw" ->
+            io:format("It's a draw!~n");
+        "Continue" ->
+            io:format("Player ~s's turn. Enter your move (1-9): ", [Player]),
+            Move = read_move(),
+            case make_move(Board, Move, Player) of
+                {ok, NewBoard} ->
+                    play_game(NewBoard, if Player == "X" -> "O"; true -> "X" end);
+                ?INVALID_MOVE ->
+                    io:format("Invalid move. Try again.~n"),
+                    play_game(Board, Player)
+            end
+    end.
 
-% Get the winner in the Tic Tac Toe game
-get_winner([]) -> ?undecided;
-get_winner([[X, X, X] | _]) -> X;
-get_winner([_ | T]) -> get_winner(T).
+% Read player's move from the console
+read_move() ->
+    {ok, [Move]} = io:fread("~d", ""),
+    Move.
 
-% Update the game state
-update_game_state(GameState, UpdateFun) ->
-    #game_state{a1=UpdateFun(a1), a2=UpdateFun(a2), a3=UpdateFun(a3),
-                b1=UpdateFun(b1), b2=UpdateFun(b2), b3=UpdateFun(b3),
-                c1=UpdateFun(c1), c2=UpdateFun(c2), c3=UpdateFun(c3)}.
-
-% Check if a move is valid
-is_valid_move(Move, GameState) ->
-    lists:member(Move, game_state_to_list(GameState)).
-
-% Convert game state to a list
-game_state_to_list(GameState) ->
-    [GameState#a1, GameState#a2, GameState#a3, GameState#b1, GameState#b2, GameState#b3,
-     GameState#c1, GameState#c2, GameState#c3].
-
-
-% Value if match
-value_if_match(X, X, NewValue) -> NewValue;
-value_if_match(X, _, _) -> X.
-
-% Get the player atom
-player_atom(X, _, X) -> ?x;
-player_atom(_, Y, Y) -> ?o.
-
-% Change the current player
-change_player(PlayerOne, PlayerTwo, PlayerOne) -> PlayerTwo;
-change_player(PlayerOne, PlayerTwo, PlayerTwo) -> PlayerOne.
-
-% Get the PID for a player name
-get_pid_for_player_name({PlayerOnePid, WrongPlayerName}, _, WrongPlayerName) -> PlayerOnePid;
-get_pid_for_player_name(_, {PlayerTwoPid, WrongPlayerName}, WrongPlayerName) -> PlayerTwoPid.
+% Reset the game
+reset_game() ->
+    io:format("The game has been reset.~n"),
+    start().
