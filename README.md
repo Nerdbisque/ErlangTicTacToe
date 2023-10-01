@@ -1,29 +1,21 @@
 # Erlang.Tic-Tac-Toe
-{Important!  Do not say in this section that this is college assignment.  Talk about what you are trying to accomplish as a software engineer to further your learning.}
+Purpose of this code was to learn and investigate erlang language and allow myself to dive deeper into an unfamiliar territory
 
-{Provide a description for the software that you wrote to demonstrate the Erlang language.}
+This code is to accomplish the task of playing a two player game of tic tac toe. Each player will be given turns to accomplish picking spots on the board till one player acheives 3 in a row.
 
-{Describe your purpose for writing this software.}
-
-{Provide a link to your YouTube demonstration.  It should be a 4-5 minute demo of the software running and a walkthrough of the code.  Focus should be on sharing what you learned about the language syntax.}
-
-[Software Demo Video](http://youtube.link.goes.here)
+[Software Demo Video]()
 
 # Development Environment
+To develop this software I used visual studio and the installed erlang shell.
 
-{Describe the tools that you used to develop the software}
-
-{Describe the programming language that you used and any libraries.}
+Erlang is a functional programming language and runtime engironment. Orginially erlang was used for telecommunications.
 
 # Useful Websites
 
-{Make a list of websites that you found helpful in this project}
-* [Web Site Name](http://url.link.goes.here)
-* [Web Site Name](http://url.link.goes.here)
+* [Erlang](https://erlang.org/documentation/doc-5.3/doc/getting_started/getting_started.html)
+* [tutorialspoint](https://www.tutorialspoint.com/erlang/index.htm)
 
 # Future Work
 
-{Make a list of things that you need to fix, improve, and add in the future.}
-* Item 1
-* Item 2
-* Item 3 
+* Allow the game to register proper game win state.
+* Make sure inputs for each player respond properly
